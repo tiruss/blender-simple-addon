@@ -31,13 +31,18 @@ pytorch_packages = [
     "torchaudio"
 ]
 
-# 패키지 설치 함수
+# 패키지 설치 함수 (SSL 신뢰 문제 해결)
 def install_package(package, index_url=None):
     try:
+        command = [
+            python_exec, "-m", "pip", "install", package,
+            "--trusted-host", "pypi.org",
+            "--trusted-host", "files.pythonhosted.org"
+        ]
         if index_url:
-            subprocess.check_call([python_exec, "-m", "pip", "install", package, "--index-url", index_url])
-        else:
-            subprocess.check_call([python_exec, "-m", "pip", "install", package])
+            command.extend(["--index-url", index_url])
+        
+        subprocess.check_call(command)
     except Exception as e:
         print(f"Failed to install {package}: {e}")
 
