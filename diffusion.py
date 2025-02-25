@@ -12,7 +12,35 @@ bl_info = {
 
 import bpy
 import os
+import sys
 import tempfile
+import subprocess
+
+# Blender의 Python 실행 경로 가져오기
+python_exec = sys.executable
+
+# 필요한 패키지 목록
+required_packages = ["diffusers", "torch", "transformers"]
+
+# 패키지 설치 함수
+def install_package(package):
+    try:
+        subprocess.check_call([python_exec, "-m", "pip", "install", package])
+    except Exception as e:
+        print(f"Failed to install {package}: {e}")
+
+# 패키지 자동 설치 확인
+def check_and_install_packages():
+    for package in required_packages:
+        try:
+            __import__(package)
+        except ImportError:
+            print(f"Package {package} not found, installing...")
+            install_package(package)
+
+# 실행 시 패키지 설치 확인
+check_and_install_packages()
+
 import torch
 from diffusers import StableDiffusionPipeline
 
