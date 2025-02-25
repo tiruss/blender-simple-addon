@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "Diffusion Model Add-on",
+    "name": "Diffusion Model Auto-Install Add-on",
     "author": "Your Name",
     "version": (0, 1),
     "blender": (2, 93, 0),
@@ -11,32 +11,53 @@ bl_info = {
 }
 
 import bpy
-import os
 import sys
-import tempfile
 import subprocess
+import os
 
 # Blender의 Python 실행 경로 가져오기
 python_exec = sys.executable
 
 # 필요한 패키지 목록
-required_packages = ["diffusers", "torch", "transformers"]
+required_packages = [
+    "diffusers",
+    "transformers",
+]
+
+# PyTorch CUDA 12.4 버전 설치 (CUDA 지원 포함)
+pytorch_packages = [
+    "torch",
+    "torchvision",
+    "torchaudio"
+]
 
 # 패키지 설치 함수
-def install_package(package):
+def install_package(package, index_url=None):
     try:
-        subprocess.check_call([python_exec, "-m", "pip", "install", package])
+        if index_url:
+            subprocess.check_call([python_exec, "-m", "pip", "install", package, "--index-url", index_url])
+        else:
+            subprocess.check_call([python_exec, "-m", "pip", "install", package])
     except Exception as e:
         print(f"Failed to install {package}: {e}")
 
 # 패키지 자동 설치 확인
 def check_and_install_packages():
+    # 일반 패키지 확인 및 설치
     for package in required_packages:
         try:
             __import__(package)
         except ImportError:
             print(f"Package {package} not found, installing...")
             install_package(package)
+
+    # PyTorch 패키지 확인 및 설치 (CUDA 12.4 버전)
+    try:
+        import torch
+    except ImportError:
+        print("Torch not found, installing with CUDA 12.4 support...")
+        for package in pytorch_packages:
+            install_package(package, "https://download.pytorch.org/whl/cu124")
 
 # 실행 시 패키지 설치 확인
 check_and_install_packages()
